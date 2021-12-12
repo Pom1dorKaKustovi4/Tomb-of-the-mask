@@ -23,6 +23,34 @@ def load_image(name, colorkey=None):
     return image
 
 
+def start_menu(screen):
+    global upper_l_angle
+    global lower_r_angle
+
+    screen.fill((0, 0, 0))
+    font = pygame.font.Font(None, 50)
+    text = font.render("Играть", True, pygame.Color("yellow"))
+    text_x = width // 2 - text.get_width() // 2
+    text_y = height // 2 - text.get_height() // 2
+    text_w = text.get_width()
+    text_h = text.get_height()
+    screen.blit(text, (text_x, text_y))
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 10, text_y - 10,
+                                                      text_w + 20, text_h + 20), 1)
+    upper_l_angle = (text_x - 10, text_y - 10)
+    lower_r_angle = ((text_x - 10) + (text_w + 20), (text_y - 10) + (text_h + 20))
+
+
+def draw(screen):
+    screen.fill((0, 0, 0))
+    pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
+    all_sprites.draw(screen)
+    pygame.display.flip()
+
+
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, *group):
         super().__init__(*group)
@@ -30,7 +58,7 @@ class Arrow(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = START_POSITION
 
-    def update(self, k,  *args):
+    def update(self, k, *args):
         color = k.get_at((self.rect.x, self.rect.y))
         print(color)
         if args and args[0].type == pygame.KEYDOWN:
@@ -64,6 +92,10 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
+    start_menu(screen)
+    pygame.display.flip()
+    press = False
+    start = False
     all_sprites = pygame.sprite.Group()
     Arrow(all_sprites)
     # pygame.mouse.set_visible(False)
@@ -74,12 +106,19 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
-                all_sprites.update(screen, event)
-        screen.fill((0, 0, 0))
-        pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
-        pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
-        pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
-        pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
-        all_sprites.draw(screen)
-        pygame.display.flip()
+                if start:
+                    all_sprites.update(screen, event)
+            if event.type == pygame.MOUSEMOTION:
+                if upper_l_angle[0] < event.pos[0] < lower_r_angle[0] and \
+                        upper_l_angle[1] < event.pos[1] < lower_r_angle[1]:
+                    press = True
+                else:
+                    press = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if press:
+                    start = True
+        if start:
+            draw(screen)
+            all_sprites.draw(screen)
+            pygame.display.flip()
     pygame.quit()
