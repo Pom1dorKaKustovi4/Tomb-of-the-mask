@@ -54,7 +54,7 @@ def draw(screen):
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = load_image("bomb.png")
+        self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = START_POSITION
 
