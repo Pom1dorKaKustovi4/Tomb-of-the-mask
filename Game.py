@@ -3,20 +3,9 @@ import random
 import pygame
 import os
 import sys
-
 from Main import start_menu, level_select
 
 START_POSITION = [0, 550]
-
-
-def draw(screen):
-    screen.fill((0, 0, 0))
-    pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
-    all_sprites.draw(screen)
-    pygame.display.flip()
 
 
 def load_image(name, colorkey=None):
@@ -35,10 +24,20 @@ def load_image(name, colorkey=None):
     return image
 
 
+def draw(screen):
+    screen.fill((0, 0, 0))
+    pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
+    pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
+    all_sprites.draw(screen)
+    pygame.display.flip()
+
+
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, *group):
         super().__init__(*group)
-        self.image = load_image("bomb.png")
+        self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = START_POSITION
 
@@ -76,11 +75,12 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
+    start_menu(screen)
+    level_select(screen)
+    pygame.display.flip()
     all_sprites = pygame.sprite.Group()
     Arrow(all_sprites)
     # pygame.mouse.set_visible(False)
-    start_menu(screen)
-    level_select(screen)
     running = True
     START_POSITION = [height, 0]
     while running:
@@ -90,4 +90,6 @@ if __name__ == '__main__':
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
         draw(screen)
+        all_sprites.draw(screen)
+        pygame.display.flip()
     pygame.quit()
