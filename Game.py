@@ -4,7 +4,7 @@ import pygame
 import os
 import sys
 
-from Main import start_menu
+from Main import start_menu, level_select
 
 START_POSITION = [0, 550]
 
@@ -80,6 +80,7 @@ if __name__ == '__main__':
     Arrow(all_sprites)
     # pygame.mouse.set_visible(False)
     start_menu(screen)
+    level_select(screen)
     running = True
     START_POSITION = [height, 0]
     while running:
