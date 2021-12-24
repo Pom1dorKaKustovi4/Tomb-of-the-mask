@@ -26,10 +26,10 @@ def load_image(name, colorkey=None):
 
 def draw(screen):
     screen.fill((0, 0, 0))
-    pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
-    pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
+    # pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
+    # pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
+    # pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
+    # pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
     all_sprites.draw(screen)
     pygame.display.flip()
 
@@ -39,11 +39,11 @@ class Arrow(pygame.sprite.Sprite):
         super().__init__(*group)
         self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = START_POSITION
+        self.rect.x, self.rect.y = START_POSITION[0] * self.image.get_width(), \
+                                    self.image.get_height() * START_POSITION[1]
 
     def update(self, k, *args):
         color = k.get_at((self.rect.x, self.rect.y))
-        print(color)
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
                 while self.rect.y + 1 < 550:
@@ -71,6 +71,35 @@ class Arrow(pygame.sprite.Sprite):
                         break
 
 
+def load_level(filename):
+    filename = "data/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+
+    max_width = max(map(len, level_map))
+
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
+
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(tiles_group, all_sprites)
+        self.image = load_image("wall.png")
+        self.rect = self.image.get_rect().move(
+            self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+
+
+def generate_level(level):
+    x, y = None, None
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '#':
+                Tile(x, y)
+            elif level[y][x] == '@':
+                xp, yp = x, y
+    return xp, yp
+
+
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 800, 600
@@ -79,10 +108,12 @@ if __name__ == '__main__':
     level_select(screen)
     pygame.display.flip()
     all_sprites = pygame.sprite.Group()
+    tiles_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    START_POSITION = generate_level(load_level('map.txt'))
     Arrow(all_sprites)
-    # pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(False)
     running = True
-    START_POSITION = [height, 0]
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
