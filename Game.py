@@ -5,7 +5,8 @@ import os
 import sys
 from Main import start_menu, level_select
 
-START_POSITION = [0, 550]
+poss = (0, 0)
+cir = 0
 
 
 def load_image(name, colorkey=None):
@@ -26,24 +27,22 @@ def load_image(name, colorkey=None):
 
 def draw(screen):
     screen.fill((0, 0, 0))
-    # pygame.draw.rect(screen, (255, 255, 0), (0, 0, 100, 100))
-    # pygame.draw.rect(screen, (255, 255, 0), (width - 100, height - 200, 100, 100))
-    # pygame.draw.rect(screen, (255, 255, 0), (50, height - 100, 100, 100))
-    # pygame.draw.rect(screen, (255, 255, 0), (width - 200, 200, 100, 100))
     all_sprites.draw(screen)
     pygame.display.flip()
 
 
 class Arrow(pygame.sprite.Sprite):
     def __init__(self, *group):
+        global POSITION
         super().__init__(*group)
         self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = START_POSITION[0] * self.image.get_width(), \
-                                    self.image.get_height() * START_POSITION[1]
+        self.rect.x, self.rect.y = POSITION[0] * self.image.get_width(), \
+                                   self.image.get_height() * POSITION[1]
+        POSITION = [self.rect.y // 50, self.rect.x // 50]
 
     def update(self, k, *args):
-        color = k.get_at((self.rect.x, self.rect.y))
+        global POSITION
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
                 while self.rect.y + 1 < 550:
@@ -69,6 +68,7 @@ class Arrow(pygame.sprite.Sprite):
                         self.rect.x += 1
                     else:
                         break
+        POSITION = (self.rect.y // 50, self.rect.x // 50)
 
 
 def load_level(filename):
@@ -89,6 +89,71 @@ class Tile(pygame.sprite.Sprite):
             self.image.get_width() * pos_x, self.image.get_height() * pos_y)
 
 
+class Spirit(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(player_group)
+        self.image = load_image("spirit.png")
+        self.rect = self.image.get_rect().move(
+            50 * pos_x, 50 * pos_y)
+
+    def update(self, k):
+        global cir
+        if cir == 50:
+            queue = []
+            pos = [0, 0]
+            matrix = []
+            for i in range(len(mmap)):
+                matrix.append([])
+                for j in range(len(mmap[i])):
+                    if k.get_at((50 * j, 50 * i)) == (255, 255, 0, 255):
+                        matrix[i].append(-1)
+                    else:
+                        matrix[i].append(0)
+            # self.rect.x = self.rect.x // len(matrix[self.rect.y // 50]) * len(matrix[self.rect.y // 50])
+            matrix[self.rect.y // 50][self.rect.x // 50] = 1
+            queue.append((self.rect.y // 50, self.rect.x // 50))
+            now = (0, 0)
+            while queue:
+                now = queue.pop(0)
+                if now[0] == POSITION[0] and now[1] == POSITION[1]:
+                    break
+                if matrix[now[0]][now[1]] != -1 and now[0] != 0 and matrix[now[0] - 1][now[1]] == 0:
+                    matrix[now[0] - 1][now[1]] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0] - 1, now[1]))
+                if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 0:
+                    matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0] + 1, now[1]))
+                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[1] != 14 \
+                        and matrix[now[0]][now[1] + 1] == 0:
+                    matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0], now[1] + 1))
+                if matrix[now[0]][now[1]] != -1 and now[1] != 0 and matrix[now[0]][now[1] - 1] == 0:
+                    matrix[now[0]][now[1] - 1] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0], now[1] - 1))
+            queue.clear()
+            # for i in matrix:
+            #     print(i)
+            while matrix[now[0]][now[1]] > 2:
+                if now[0] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0] - 1][now[1]]:
+                    now = (now[0] - 1, now[1])
+                elif now[0] != len(mmap) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
+                    now = (now[0] + 1, now[1])
+                elif now[1] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] - 1]:
+                    now = (now[0], now[1] - 1)
+                elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
+                    now = (now[0], now[1] + 1)
+            if now[0] != 0 and matrix[now[0] - 1][now[1]] == 1:
+                self.rect.y += 50
+            elif now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 1:
+                self.rect.y -= 50
+            elif now[1] != 0 and matrix[now[0]][now[1] - 1] == 1:
+                self.rect.x += 50
+            elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1] + 1] == 1:
+                self.rect.x -= 50
+            cir = 0
+        cir += 1
+
+
 def generate_level(level):
     x, y = None, None
     for y in range(len(level)):
@@ -97,6 +162,8 @@ def generate_level(level):
                 Tile(x, y)
             elif level[y][x] == '@':
                 xp, yp = x, y
+            elif level[y][x] == '$':
+                Spirit(x, y)
     return xp, yp
 
 
@@ -110,7 +177,8 @@ if __name__ == '__main__':
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
-    START_POSITION = generate_level(load_level('map.txt'))
+    mmap = load_level('map.txt')
+    POSITION = generate_level(mmap)
     Arrow(all_sprites)
     pygame.mouse.set_visible(False)
     running = True
@@ -120,7 +188,9 @@ if __name__ == '__main__':
                 running = False
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
+        player_group.update(screen)
         draw(screen)
+        player_group.draw(screen)
         all_sprites.draw(screen)
         pygame.display.flip()
     pygame.quit()
