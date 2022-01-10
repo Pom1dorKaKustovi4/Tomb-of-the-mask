@@ -3,7 +3,8 @@ import random
 import pygame
 import os
 import sys
-from Main import start_menu, level_select
+from time import sleep
+from Main import start_menu, pause, win
 
 poss = (0, 0)
 cir = 0
@@ -43,31 +44,35 @@ class Arrow(pygame.sprite.Sprite):
 
     def update(self, k, *args):
         global POSITION
+        global win_coord
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
-                while self.rect.y + 1 < 550:
+                while self.rect.y + 1 < 551:
                     if k.get_at((self.rect.x, (self.rect.y + self.image.get_height()) % height)) != (255, 255, 0, 255):
                         self.rect.y += 1
                     else:
                         break
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_w:
-                while self.rect.y - 1 > 0:
+                while self.rect.y - 1 >= 0:
                     if k.get_at((self.rect.x, self.rect.y - 1)) != (255, 255, 0, 255):
                         self.rect.y -= 1
                     else:
                         break
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_a:
-                while self.rect.x - 1 > 0:
+                while self.rect.x - 1 >= 0:
                     if k.get_at((self.rect.x - 1, self.rect.y)) != (255, 255, 0, 255):
                         self.rect.x -= 1
                     else:
                         break
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_d:
-                while self.rect.x + 1 < 750:
+                while self.rect.x + 1 < 751:
                     if k.get_at(((self.rect.x + self.image.get_width()) % width, self.rect.y)) != (255, 255, 0, 255):
                         self.rect.x += 1
                     else:
                         break
+            if win_coord[0] == self.rect.x and win_coord[1] == self.rect.y:
+                win(screen)
+
         POSITION = (self.rect.y // 50, self.rect.x // 50)
 
 
@@ -87,6 +92,19 @@ class Tile(pygame.sprite.Sprite):
         self.image = load_image("wall.png")
         self.rect = self.image.get_rect().move(
             self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+
+
+class Win(pygame.sprite.Sprite):
+    def __init__(self, pos_x=0, pos_y=0):
+        super().__init__(tiles_group, all_sprites)
+        global win_coord
+        win_coord = (0, 0)
+        self.image = load_image("win.png")
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect().move(
+            self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+        if pos_x > 0 and pos_y > 0:
+            win_coord = (pos_x * 50, pos_y * 50)
 
 
 class Spirit(pygame.sprite.Sprite):
@@ -160,6 +178,8 @@ def generate_level(level):
         for x in range(len(level[y])):
             if level[y][x] == '#':
                 Tile(x, y)
+            elif level[y][x] == '!':
+                Win(x, y)
             elif level[y][x] == '@':
                 xp, yp = x, y
             elif level[y][x] == '$':
@@ -172,7 +192,6 @@ if __name__ == '__main__':
     size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
     start_menu(screen)
-    level_select(screen)
     pygame.display.flip()
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
@@ -180,17 +199,21 @@ if __name__ == '__main__':
     mmap = load_level('map.txt')
     POSITION = generate_level(mmap)
     Arrow(all_sprites)
+    clock = pygame.time.Clock()
     pygame.mouse.set_visible(False)
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pause(screen)
+                pygame.display.flip()
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
+                all_sprites.draw(screen)
         player_group.update(screen)
         draw(screen)
         player_group.draw(screen)
-        all_sprites.draw(screen)
         pygame.display.flip()
     pygame.quit()

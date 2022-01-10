@@ -45,6 +45,7 @@ def start_menu(screen):
                     exit = False
                     press = False
             if event.type == pygame.MOUSEBUTTONDOWN and press:
+                level_select(screen)
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and exit:
                 quit()
@@ -118,6 +119,109 @@ def level_select(screen):
                     press = False
             if event.type == pygame.MOUSEBUTTONDOWN and press:
                 running = False
+
+
+def pause(screen):
+    print("work")
+    size = width, height = 800, 600
+    screen.fill((120, 120, 120), pygame.Rect(250, 0, 300, 600))
+    pygame.draw.line(screen, (100, 100, 100), (260, 0), (260, 600), width=20)
+    pygame.draw.line(screen, (100, 100, 100), (260, 590), (549, 590), width=20)
+
+    image2 = pygame.image.load('data/pause.png').convert_alpha()
+    screen.blit(image2, (360, 50))
+
+    font = pygame.font.Font(None, 50)
+    text_play = font.render("Продолжить", True, pygame.Color("yellow"))
+    text_x = width // 2 - text_play.get_width() // 2 + 10
+    text_y = height // 2 - text_play.get_height() // 2 - 150
+    text_w = text_play.get_width()
+    text_h = text_play.get_height()
+    screen.blit(text_play, (text_x, text_y + 80))
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 10, text_y + 70,
+                                                      text_w + 20, text_h + 20), 4)
+
+    text_l_select = font.render("Выбор уровня", True, pygame.Color("yellow"))
+    text_x = width // 2 - text_l_select.get_width() // 2 + 10
+    text_y = height // 2 - text_l_select.get_height() // 2 - 150
+    text_w = text_l_select.get_width()
+    text_h = text_l_select.get_height()
+    screen.blit(text_l_select, (text_x, text_y + 195))
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 10, text_y + 185,
+                                                      text_w + 20, text_h + 20), 4)
+
+    text_exit = font.render("В меню", True, pygame.Color("yellow"))
+    text_x = width // 2 - text_exit.get_width() // 2 + 10
+    text_y = height // 2 - text_exit.get_height() // 2 - 150
+    text_w = text_exit.get_width()
+    text_h = text_exit.get_height()
+    screen.blit(text_exit, (text_x, text_y + 310))
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 10, text_y + 300,
+                                                      text_w + 20, text_h + 20), 4)
+
+    upper_l_angle_play = (text_x - 10, text_y + 70)
+    lower_r_angle_play = ((text_x - 10) + (text_w + 20), (text_y + 70) + (text_h + 20))
+    upper_l_angle_lvl_select = (text_x - 10, text_y + 185)
+    lower_r_angle_lvl_select = ((text_x - 10) + (text_w + 20), (text_y + 185) + (text_h + 20))
+    upper_l_angle_exit = (text_x - 10, text_y + 300)
+    lower_r_angle_exit = ((text_x - 10) + (text_w + 20), (text_y + 300) + (text_h + 20))
+
+    pygame.mouse.set_visible(True)
+
+    pygame.display.flip()
+
+    press = False
+    l_sel = False
+    exit = False
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                pygame.mouse.set_visible(False)
+                running = False
+            if event.type == pygame.MOUSEMOTION:
+                if upper_l_angle_play[0] < event.pos[0] < lower_r_angle_play[0] and \
+                        upper_l_angle_play[1] < event.pos[1] < lower_r_angle_play[1]:
+                    press = True
+                elif upper_l_angle_exit[0] < event.pos[0] < lower_r_angle_exit[0] and \
+                        upper_l_angle_exit[1] < event.pos[1] < lower_r_angle_exit[1]:
+                    exit = True
+                elif upper_l_angle_lvl_select[0] < event.pos[0] < lower_r_angle_lvl_select[0] and \
+                        upper_l_angle_lvl_select[1] < event.pos[1] < lower_r_angle_lvl_select[1]:
+                    l_sel = True
+                else:
+                    l_sel = False
+                    exit = False
+                    press = False
+            if event.type == pygame.MOUSEBUTTONDOWN and press:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and exit:
+                start_menu(screen)
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN and l_sel:
+                level_select(screen)
+                running = False
+
+
+def win(screen):
+    size = width, height = 800, 600
+    screen.fill((0, 0, 0), pygame.Rect(0, 0, 800, 600))
+
+    image = pygame.image.load("data/wictory.png")
+    image = pygame.transform.scale(image, (689.127105666156, 500))
+    screen.blit(image, (100, 50))
+
+
+    pygame.display.flip()
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+
 
 
 if __name__ == '__main__':
