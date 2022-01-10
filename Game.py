@@ -8,7 +8,7 @@ from Main import start_menu, pause, win
 
 poss = (0, 0)
 cir = 0
-
+#2
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
