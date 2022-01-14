@@ -8,7 +8,9 @@ from Main import start_menu, pause, win
 
 poss = (0, 0)
 cir = 0
-#2
+
+
+# 2
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -47,7 +49,7 @@ class Arrow(pygame.sprite.Sprite):
         global win_coord
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
-                while self.rect.y + 1 < 551:
+                while self.rect.y + 1 < 851:
                     if k.get_at((self.rect.x, (self.rect.y + self.image.get_height()) % height)) != (255, 255, 0, 255):
                         self.rect.y += 1
                     else:
@@ -65,7 +67,7 @@ class Arrow(pygame.sprite.Sprite):
                     else:
                         break
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_d:
-                while self.rect.x + 1 < 751:
+                while self.rect.x + 1 < 1351:
                     if k.get_at(((self.rect.x + self.image.get_width()) % width, self.rect.y)) != (255, 255, 0, 255):
                         self.rect.x += 1
                     else:
@@ -105,6 +107,30 @@ class Win(pygame.sprite.Sprite):
             self.image.get_width() * pos_x, self.image.get_height() * pos_y)
         if pos_x > 0 and pos_y > 0:
             win_coord = (pos_x * 50, pos_y * 50)
+
+
+class Thorn(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, rotation):
+        super().__init__(tiles_group, all_sprites)
+        if rotation == "up":
+            self.image = load_image("thorns_up.png")
+            self.rect = self.image.get_rect().move(
+                self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+
+        if rotation == "down":
+            self.image = load_image("thorns_down.png")
+            self.rect = self.image.get_rect().move(
+                self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+
+        if rotation == "left":
+            self.image = load_image("thorns_left.png")
+            self.rect = self.image.get_rect().move(
+                self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+
+        if rotation == "right":
+            self.image = load_image("thorns_right.png")
+            self.rect = self.image.get_rect().move(
+                self.image.get_width() * pos_x, self.image.get_height() * pos_y)
 
 
 class Spirit(pygame.sprite.Sprite):
@@ -178,6 +204,14 @@ def generate_level(level):
         for x in range(len(level[y])):
             if level[y][x] == '#':
                 Tile(x, y)
+            elif level[y][x] == "^":
+                Thorn(x, y, "up")
+            elif level[y][x] == ">":
+                Thorn(x, y, "right")
+            elif level[y][x] == "<":
+                Thorn(x, y, "left")
+            elif level[y][x] == "-":
+                Thorn(x, y, "down")
             elif level[y][x] == '!':
                 Win(x, y)
             elif level[y][x] == '@':
@@ -189,7 +223,7 @@ def generate_level(level):
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
     start_menu(screen)
     pygame.display.flip()

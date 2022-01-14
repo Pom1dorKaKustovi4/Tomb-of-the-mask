@@ -1,8 +1,9 @@
 import pygame
 
-#1
+
+# 1
 def start_menu(screen):
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen.fill((0, 0, 0))
     font = pygame.font.Font(None, 50)
     text_play = font.render("Играть", True, pygame.Color("yellow"))
@@ -52,7 +53,7 @@ def start_menu(screen):
 
 
 def level_select(screen):
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen.fill((0, 0, 0))
     font = pygame.font.Font(None, 50)
     text_choose_level = font.render("Выберите уровень", True, pygame.Color("yellow"))
@@ -123,7 +124,7 @@ def level_select(screen):
 
 def pause(screen):
     print("work")
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen.fill((120, 120, 120), pygame.Rect(250, 0, 300, 600))
     pygame.draw.line(screen, (100, 100, 100), (260, 0), (260, 600), width=20)
     pygame.draw.line(screen, (100, 100, 100), (260, 590), (549, 590), width=20)
@@ -206,13 +207,12 @@ def pause(screen):
 
 
 def win(screen):
-    size = width, height = 800, 600
-    screen.fill((0, 0, 0), pygame.Rect(0, 0, 800, 600))
+    size = width, height = 1440, 900
+    screen.fill((0, 0, 0), pygame.Rect(0, 0, 1440, 900))
 
     image = pygame.image.load("data/wictory.png")
     image = pygame.transform.scale(image, (689.127105666156, 500))
     screen.blit(image, (100, 50))
-
 
     pygame.display.flip()
 
@@ -223,10 +223,9 @@ def win(screen):
                 quit()
 
 
-
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
     start_menu(screen)
     pygame.display.flip()
