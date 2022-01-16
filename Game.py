@@ -47,8 +47,7 @@ class Character(pygame.sprite.Sprite):
         POSITION = [self.rect.y // 50, self.rect.x // 50]
 
     def update(self, k, *args):
-        global POSITION
-        global win_coord
+        global POSITION, win_coord
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
                 while self.rect.y + 1 < 851:
@@ -180,7 +179,7 @@ class Spirit(pygame.sprite.Sprite):
             queue = []
             pos = [0, 0]
             matrix = []
-            for i in range(len(mmap)):
+            for i in range(len(mmap) - 1):
                 matrix.append([])
                 for j in range(len(mmap[i])):
                     if k.get_at((50 * j, 50 * i)) == (255, 255, 0, 255):
@@ -201,8 +200,8 @@ class Spirit(pygame.sprite.Sprite):
                 if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 0:
                     matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0] + 1, now[1]))
-                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[1] != 14 \
-                        and matrix[now[0]][now[1] + 1] == 0:
+                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[0] != len(mmap) - 2\
+                        and now[1] != 14 and matrix[now[0]][now[1] + 1] == 0:
                     matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0], now[1] + 1))
                 if matrix[now[0]][now[1]] != -1 and now[1] != 0 and matrix[now[0]][now[1] - 1] == 0:
