@@ -8,6 +8,7 @@ from Main import start_menu, pause, win
 
 poss = (0, 0)
 cir = 0
+coins_pos = []
 
 
 # 2
@@ -31,7 +32,6 @@ def load_image(name, colorkey=None):
 def draw(screen):
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
-    pygame.display.flip()
 
 
 class Arrow(pygame.sprite.Sprite):
@@ -76,6 +76,35 @@ class Arrow(pygame.sprite.Sprite):
                 win(screen)
 
         POSITION = (self.rect.y // 50, self.rect.x // 50)
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__(animated_group)
+        coins_pos.append((x, y))
+        self.frames = []
+        sheet = load_image("coins.png")
+        sheet = pygame.transform.scale(sheet, (400, 50))
+        self.cut_sheet(sheet, 8, 1)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames * 2)
+        self.image = self.frames[self.cur_frame // 2]
+
+    def kick(self):
+        all_sprites.remove()
 
 
 def load_level(filename):
@@ -216,8 +245,11 @@ def generate_level(level):
                 Win(x, y)
             elif level[y][x] == '@':
                 xp, yp = x, y
-            elif level[y][x] == '$':
+            elif level[y][x] == '&':
                 Spirit(x, y)
+            elif level[y][x] == '$':
+                AnimatedSprite(x * 50, y * 50)
+
     return xp, yp
 
 
@@ -230,6 +262,7 @@ if __name__ == '__main__':
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
+    animated_group = pygame.sprite.Group()
     mmap = load_level('map.txt')
     POSITION = generate_level(mmap)
     Arrow(all_sprites)
@@ -245,9 +278,12 @@ if __name__ == '__main__':
                 pygame.display.flip()
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
-                all_sprites.draw(screen)
         player_group.update(screen)
+        animated_group.update()
         draw(screen)
+        all_sprites.draw(screen)
         player_group.draw(screen)
+        animated_group.draw(screen)
         pygame.display.flip()
+        clock.tick(20)
     pygame.quit()
