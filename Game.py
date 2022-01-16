@@ -7,6 +7,7 @@ from Main import start_menu, level_select
 
 poss = (0, 0)
 cir = 0
+COLLISIONS = []
 
 
 def load_image(name, colorkey=None):
@@ -28,15 +29,18 @@ def load_image(name, colorkey=None):
 def draw(screen):
     screen.fill((0, 0, 0))
     all_sprites.draw(screen)
+    player_group.draw(screen)
     pygame.display.flip()
 
 
-class Arrow(pygame.sprite.Sprite):
+class Character(pygame.sprite.Sprite):
     def __init__(self, *group):
-        global POSITION
+        global POSITION, COLLISIONS
         super().__init__(*group)
         self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
+        COLLISIONS.append(self.rect)
+        self.num = len(COLLISIONS) - 1
         self.rect.x, self.rect.y = POSITION[0] * self.image.get_width(), \
                                    self.image.get_height() * POSITION[1]
         POSITION = [self.rect.y // 50, self.rect.x // 50]
@@ -50,6 +54,7 @@ class Arrow(pygame.sprite.Sprite):
                         self.rect.y += 1
                     else:
                         break
+
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_w:
                 while self.rect.y - 1 > 0:
                     if k.get_at((self.rect.x, self.rect.y - 1)) != (255, 255, 0, 255):
@@ -69,6 +74,7 @@ class Arrow(pygame.sprite.Sprite):
                     else:
                         break
         POSITION = (self.rect.y // 50, self.rect.x // 50)
+        COLLISIONS[self.num] = self.rect
 
 
 def load_level(filename):
@@ -83,10 +89,12 @@ def load_level(filename):
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
+        global COLLISIONS
         super().__init__(tiles_group, all_sprites)
         self.image = load_image("wall.png")
         self.rect = self.image.get_rect().move(
             self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+        COLLISIONS.append(self.rect)
 
 
 class Spirit(pygame.sprite.Sprite):
@@ -98,7 +106,7 @@ class Spirit(pygame.sprite.Sprite):
 
     def update(self, k):
         global cir
-        if cir == 50:
+        if cir == 100:
             queue = []
             pos = [0, 0]
             matrix = []
@@ -154,6 +162,59 @@ class Spirit(pygame.sprite.Sprite):
         cir += 1
 
 
+# class Dart_Trap(pygame.sprite.Sprite):
+#     def __init__(self, pos_x, pos_y, direction):
+#         global COLLISIONS
+#         super().__init__(player_group)
+#         if direction == "r":
+#             self.image = load_image("Dart_Trap.png")
+#         elif direction == "l":
+#             self.image = pygame.transform.flip(load_image("Dart_Trap.png"), True, False)
+#         elif direction == "d":
+#             self.image = pygame.transform.rotate(load_image("Dart_Trap.png"), 270)
+#         elif direction == "u":
+#             self.image = pygame.transform.rotate(load_image("Dart_Trap.png"), 90)
+#         self.rect = self.image.get_rect().move(
+#             50 * pos_x, 50 * pos_y)
+#         # COLLISIONS.append(self.rect)
+
+
+# class Arrow(pygame.sprite.Sprite):
+#     def __init__(self, pos_x, pos_y, direction):
+#         super().__init__(player_group)
+#         self.pos_x = pos_x
+#         self.pos_y = pos_y
+#         if direction == "r":
+#             self.image = load_image("Arrow.png")
+#             self.rect = self.image.get_rect().move((self.pos_x + 1) * 50, self.pos_y * 50 + 35)
+#         elif direction == "l":
+#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 180)
+#             self.rect = self.image.get_rect().move(self.pos_x * 50 - self.image.get_width(), self.pos_y * 50 + 35)
+#         elif direction == "d":
+#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 270)
+#             self.rect = self.image.get_rect().move(self.pos_x * 50 + 5, (self.pos_y + 1) * 50)
+#         elif direction == "u":
+#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 90)
+#             self.rect = self.image.get_rect().move(self.pos_x * 50 + 35, self.pos_y * 50 - self.image.get_height())
+#         self.direction = direction
+#         self.pos = (self.rect.x, self.rect.y)
+#
+#     def update(self, k):
+#         if self.rect.collidelist(COLLISIONS):
+#             if self.direction == "l":
+#                 self.rect.x -= 1
+#             elif self.direction == "r":
+#                 self.rect.x += 1
+#             elif self.direction == "d":
+#                 self.rect.y += 1
+#             elif self.direction == "u":
+#                 self.rect.y -= 1
+#         else:
+#             self.rect.x = self.pos[0]
+#             self.rect.y = self.pos[1]
+#             print(COLLISIONS)
+
+
 def generate_level(level):
     x, y = None, None
     for y in range(len(level)):
@@ -164,6 +225,19 @@ def generate_level(level):
                 xp, yp = x, y
             elif level[y][x] == '$':
                 Spirit(x, y)
+            # elif level[y][x] == 'd':
+            #     Dart_Trap(x, y, "d")
+            #     Arrow(x, y, "d")
+            # elif level[y][x] == 'u':
+            #     Dart_Trap(x, y, "u")
+            #     Arrow(x, y, "u")
+            # elif level[y][x] == 'l':
+            #     Dart_Trap(x, y, "l")
+            #     Arrow(x, y, "l")
+            # elif level[y][x] == 'r':
+            #     Dart_Trap(x, y, "r")
+            #     Arrow(x, y, "r")
+
     return xp, yp
 
 
@@ -179,7 +253,7 @@ if __name__ == '__main__':
     player_group = pygame.sprite.Group()
     mmap = load_level('map.txt')
     POSITION = generate_level(mmap)
-    Arrow(all_sprites)
+    Character(all_sprites)
     pygame.mouse.set_visible(False)
     running = True
     while running:
