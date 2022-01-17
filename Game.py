@@ -339,6 +339,7 @@ if __name__ == '__main__':
     animated_group = pygame.sprite.Group()
     mmap = load_level('map.txt')
     POSITION = generate_level(mmap)
+    Character(all_sprites)
     clock = pygame.time.Clock()
     pygame.mouse.set_visible(False)
     running = True
