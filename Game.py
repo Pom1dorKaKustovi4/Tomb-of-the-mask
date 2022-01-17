@@ -4,13 +4,17 @@ import pygame
 import os
 import sys
 from time import sleep
-from Main import start_menu, pause, win
+from Main import start_menu, pause, win, lose
+
+winn = False
 
 poss = (0, 0)
 cir = 0
 coins_pos = []
 COLLISIONS = []
 
+
+# 2
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -47,7 +51,7 @@ class Character(pygame.sprite.Sprite):
         POSITION = [self.rect.y // 50, self.rect.x // 50]
 
     def update(self, k, *args):
-        global POSITION, win_coord
+        global POSITION, win_coord, winn
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
                 while self.rect.y + 1 < 851:
@@ -74,7 +78,8 @@ class Character(pygame.sprite.Sprite):
                     else:
                         break
             if win_coord[0] == self.rect.x and win_coord[1] == self.rect.y:
-                win(screen)
+                pygame.display.flip()
+                winn = True
 
         POSITION = (self.rect.y // 50, self.rect.x // 50)
         COLLISIONS[self.num] = self.rect
@@ -200,7 +205,7 @@ class Spirit(pygame.sprite.Sprite):
                 if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 0:
                     matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0] + 1, now[1]))
-                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[0] != len(mmap) - 2\
+                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[0] != len(mmap) - 2 \
                         and now[1] != 14 and matrix[now[0]][now[1] + 1] == 0:
                     matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0], now[1] + 1))
@@ -334,7 +339,6 @@ if __name__ == '__main__':
     animated_group = pygame.sprite.Group()
     mmap = load_level('map.txt')
     POSITION = generate_level(mmap)
-    Character(all_sprites)
     clock = pygame.time.Clock()
     pygame.mouse.set_visible(False)
     running = True
@@ -354,5 +358,8 @@ if __name__ == '__main__':
         player_group.draw(screen)
         animated_group.draw(screen)
         pygame.display.flip()
+        if winn:
+            win(screen)
+            winn = False
         clock.tick(20)
     pygame.quit()
