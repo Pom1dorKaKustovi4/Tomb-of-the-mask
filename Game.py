@@ -110,9 +110,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = (self.cur_frame + 1) % len(self.frames * 2)
         self.image = self.frames[self.cur_frame // 2]
 
-    def kick(self):
-        all_sprites.remove()
-
 
 def load_level(filename):
     filename = "data/" + filename
@@ -311,34 +308,42 @@ def generate_level(level):
                 Spirit(x, y)
             elif level[y][x] == '$':
                 AnimatedSprite(x * 50, y * 50)
-            # elif level[y][x] == 'd':
-            #     Dart_Trap(x, y, "d")
-            #     Arrow(x, y, "d")
-            # elif level[y][x] == 'u':
-            #     Dart_Trap(x, y, "u")
-            #     Arrow(x, y, "u")
-            # elif level[y][x] == 'l':
-            #     Dart_Trap(x, y, "l")
-            #     Arrow(x, y, "l")
-            # elif level[y][x] == 'r':
-            #     Dart_Trap(x, y, "r")
-            #     Arrow(x, y, "r")
 
     return xp, yp
+
+
+def choose_level(level):
+    global mmap, POSITION
+    if level == "1":
+        mmap = load_level('map.txt')
+        POSITION = generate_level(mmap)
+    elif level == "2":
+        mmap = load_level('map2.txt')
+        POSITION = generate_level(mmap)
+    elif level == "3":
+        mmap = load_level('map3.txt')
+        POSITION = generate_level(mmap)
+
+
+def delete_sprite():
+    global all_sprites, tiles_group, player_group, animated_group
+    all_sprites = pygame.sprite.Group()
+    tiles_group = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    animated_group = pygame.sprite.Group()
 
 
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
-    start_menu(screen)
+    a = start_menu(screen)
     pygame.display.flip()
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     animated_group = pygame.sprite.Group()
-    mmap = load_level('map.txt')
-    POSITION = generate_level(mmap)
+    choose_level(a)
     Character(all_sprites)
     clock = pygame.time.Clock()
     pygame.mouse.set_visible(False)
@@ -360,7 +365,9 @@ if __name__ == '__main__':
         animated_group.draw(screen)
         pygame.display.flip()
         if winn:
-            win(screen)
+            b = win(screen)
+            choose_level(b)
             winn = False
+            pygame.display.flip()
         clock.tick(20)
     pygame.quit()

@@ -46,11 +46,11 @@ def start_menu(screen):
                     exit = False
                     press = False
             if event.type == pygame.MOUSEBUTTONDOWN and press:
-                level_select(screen)
+                result = level_select(screen)
                 running = False
+                return result
             elif event.type == pygame.MOUSEBUTTONDOWN and exit:
                 quit()
-
 
 def level_select(screen):
     size = width, height = 1440, 900
@@ -58,8 +58,8 @@ def level_select(screen):
     font = pygame.font.Font(None, 50)
     text_choose_level = font.render("Выберите уровень", True, pygame.Color("yellow"))
     text_level_1 = font.render("1", True, pygame.Color("yellow"))
-    text_level_2 = font.render("2", True, pygame.Color("red"))
-    text_level_3 = font.render("3", True, pygame.Color("red"))
+    text_level_2 = font.render("2", True, pygame.Color("yellow"))
+    text_level_3 = font.render("3", True, pygame.Color("yellow"))
     text_level_4 = font.render("4", True, pygame.Color("red"))
     text_level_5 = font.render("5", True, pygame.Color("red"))
     text_x = width // 2 - text_level_1.get_width() // 2
@@ -78,11 +78,11 @@ def level_select(screen):
     pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 300, text_y - 10,
                                                       text_w + 40, text_h + 20), 1)
 
-    pygame.draw.rect(screen, pygame.Color("red"), (text_x - 160, text_y - 10,
-                                                   text_w + 40, text_h + 20), 1)
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 160, text_y - 10,
+                                                      text_w + 40, text_h + 20), 1)
 
-    pygame.draw.rect(screen, pygame.Color("red"), (text_x - 20, text_y - 10,
-                                                   text_w + 40, text_h + 20), 1)
+    pygame.draw.rect(screen, pygame.Color("yellow"), (text_x - 20, text_y - 10,
+                                                      text_w + 40, text_h + 20), 1)
 
     pygame.draw.rect(screen, pygame.Color("red"), (text_x + 120, text_y - 10,
                                                    text_w + 40, text_h + 20), 1)
@@ -94,11 +94,11 @@ def level_select(screen):
     upper_l_angle_level_1 = (text_x - 300, text_y - 10)
     lower_r_angle_level_1 = ((text_x - 300) + (text_w + 40), (text_y - 10) + (text_h + 20))
 
-    upper_l_angle_level_2 = (text_x - 10, text_y + 50)
-    lower_r_angle_level_2 = ((text_x - 10) + (text_w + 20), (text_y + 50) + (text_h + 20))
+    upper_l_angle_level_2 = (text_x - 160, text_y -10)
+    lower_r_angle_level_2 = ((text_x - 160) + (text_w + 20), (text_y - 10) + (text_h + 20))
 
-    upper_l_angle_level_3 = (text_x - 10, text_y + 50)
-    lower_r_angle_level_3 = ((text_x - 10) + (text_w + 20), (text_y + 50) + (text_h + 20))
+    upper_l_angle_level_3 = (text_x - 20, text_y - 10)
+    lower_r_angle_level_3 = ((text_x - 20) + (text_w + 20), (text_y - 10) + (text_h + 20))
 
     upper_l_angle_level_4 = (text_x - 10, text_y + 50)
     lower_r_angle_level_4 = ((text_x - 10) + (text_w + 20), (text_y + 50) + (text_h + 20))
@@ -108,6 +108,8 @@ def level_select(screen):
 
     running = True
     press = False
+    press2 = False
+    press3 = False
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -116,10 +118,25 @@ def level_select(screen):
                 if upper_l_angle_level_1[0] < event.pos[0] < lower_r_angle_level_1[0] and \
                         upper_l_angle_level_1[1] < event.pos[1] < lower_r_angle_level_1[1]:
                     press = True
+                elif upper_l_angle_level_2[0] < event.pos[0] < lower_r_angle_level_2[0] and \
+                        upper_l_angle_level_2[1] < event.pos[1] < lower_r_angle_level_2[1]:
+                    press2 = True
+                elif upper_l_angle_level_3[0] < event.pos[0] < lower_r_angle_level_3[0] and \
+                        upper_l_angle_level_3[1] < event.pos[1] < lower_r_angle_level_3[1]:
+                    press3 = True
                 else:
                     press = False
+                    press2 = False
+                    press3 = False
             if event.type == pygame.MOUSEBUTTONDOWN and press:
                 running = False
+                return "1"
+            if event.type == pygame.MOUSEBUTTONDOWN and press2:
+                running = False
+                return "2"
+            if event.type == pygame.MOUSEBUTTONDOWN and press3:
+                running = False
+                return "3"
 
 
 def pause(screen):
@@ -258,7 +275,9 @@ def win(screen):
                     b_select_level = False
             if event.type == pygame.MOUSEBUTTONDOWN and b_select_level:
                 running = False
-                level_select(screen)
+                result = level_select(screen)
+                return result
+
 
 def lose(screen):
     size = width, height = 1440, 900
