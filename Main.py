@@ -52,6 +52,7 @@ def start_menu(screen):
             elif event.type == pygame.MOUSEBUTTONDOWN and exit:
                 quit()
 
+
 def level_select(screen):
     size = width, height = 1440, 900
     screen.fill((0, 0, 0))
@@ -94,7 +95,7 @@ def level_select(screen):
     upper_l_angle_level_1 = (text_x - 300, text_y - 10)
     lower_r_angle_level_1 = ((text_x - 300) + (text_w + 40), (text_y - 10) + (text_h + 20))
 
-    upper_l_angle_level_2 = (text_x - 160, text_y -10)
+    upper_l_angle_level_2 = (text_x - 160, text_y - 10)
     lower_r_angle_level_2 = ((text_x - 160) + (text_w + 20), (text_y - 10) + (text_h + 20))
 
     upper_l_angle_level_3 = (text_x - 20, text_y - 10)
@@ -216,14 +217,15 @@ def pause(screen):
             if event.type == pygame.MOUSEBUTTONDOWN and press:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and exit:
-                start_menu(screen)
-                running = False
+                return "0"
+ #               running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and l_sel:
-                level_select(screen)
-                running = False
+                return "1"
+   #             running = False
 
 
-def win(screen):
+
+def win(screen, monet):
     size = width, height = 1440, 900
     screen.fill((0, 0, 0), pygame.Rect(470, 0, 500, 900))
 
@@ -232,7 +234,7 @@ def win(screen):
 
     text_coins_collected = font.render("Монет собрано:", True, pygame.Color("green"))
 
-    text_coins_collected_quanity = font.render("0", True, pygame.Color("yellow"))
+    text_coins_collected_quanity = font.render(str(monet), True, pygame.Color("yellow"))
 
     text_b_select_level = font.render("К выбору уровней", True, (19, 108, 191))
 

@@ -1,10 +1,11 @@
 import random
-
+import sys
+import sqlite3
 import pygame
 import os
 import sys
 from time import sleep
-from Main import start_menu, pause, win, lose
+from Main import start_menu, pause, win, level_select, lose
 
 winn = False
 
@@ -62,7 +63,7 @@ class Character(pygame.sprite.Sprite):
                         break
                     if self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                        print(COLLISIONS)
+                    #                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -129,10 +130,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        global count
+        global count, coin
         if is_collected[self.num]:
-            self.rect.x = 50 * self.num
             self.rect.y = 0
+            self.rect.x = 50 * count
+            count += 1
+            is_collected[self.num] = False
+            print(count)
         else:
             self.rect = coins_pos[self.num]
             self.cur_frame = (self.cur_frame + 1) % len(self.frames * 2)
@@ -359,16 +363,30 @@ def choose_level(level):
 
 
 def delete_sprite():
-    global all_sprites, tiles_group, player_group, animated_group
-    all_sprites = pygame.sprite.Group()
-    tiles_group = pygame.sprite.Group()
+    global all_sprites, tiles_group, player_group, animated_group, count
+    count = 0
+    for i in all_sprites:
+        i.kill()
+    for j in animated_group:
+        j.kill()
+    for i in player_group:
+        i.kill()
+
+
+def load_pers():
+    global player_group
     player_group = pygame.sprite.Group()
-    animated_group = pygame.sprite.Group()
+    Character(all_sprites)
+
+
+def database():
+    db = sqlite3.connect("database.db")
+    cur = db.cursor()
 
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
     a = start_menu(screen)
     pygame.display.flip()
@@ -386,7 +404,18 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pause(screen)
+                e = pause(screen)
+                if e:
+                    delete_sprite()
+                    if e == "1":
+                        b = level_select(screen)
+                        choose_level(b)
+                        load_pers()
+                    elif e == "0":
+                        a = start_menu(screen)
+                        choose_level(a)
+                        load_pers()
+
                 pygame.display.flip()
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
@@ -398,8 +427,10 @@ if __name__ == '__main__':
         animated_group.draw(screen)
         pygame.display.flip()
         if winn:
-            b = win(screen)
+            b = win(screen, count)
+            delete_sprite()
             choose_level(b)
+            load_pers()
             winn = False
             pygame.display.flip()
         clock.tick(20)
