@@ -61,9 +61,9 @@ class Character(pygame.sprite.Sprite):
                         self.rect.y += 1
                     else:
                         break
-                    if self.rect.collidelist(COLLISIONS):
+                    if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                    #                        print(COLLISIONS)
+                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -73,8 +73,9 @@ class Character(pygame.sprite.Sprite):
                         self.rect.y -= 1
                     else:
                         break
-                    if self.rect.collidelist(COLLISIONS):
+                    if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
+                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -84,8 +85,9 @@ class Character(pygame.sprite.Sprite):
                         self.rect.x -= 1
                     else:
                         break
-                    if self.rect.collidelist(COLLISIONS):
+                    if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
+                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -95,8 +97,9 @@ class Character(pygame.sprite.Sprite):
                         self.rect.x += 1
                     else:
                         break
-                    if self.rect.collidelist(COLLISIONS):
+                    if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
+                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -386,7 +389,7 @@ def database():
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 1440, 900
+    size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
     a = start_menu(screen)
     pygame.display.flip()
@@ -433,5 +436,9 @@ if __name__ == '__main__':
             load_pers()
             winn = False
             pygame.display.flip()
+        if is_dead:
+            lose(screen)
+            pygame.display.flip()
+            is_dead = False
         clock.tick(20)
     pygame.quit()
