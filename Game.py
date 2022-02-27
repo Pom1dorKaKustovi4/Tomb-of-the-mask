@@ -63,7 +63,6 @@ class Character(pygame.sprite.Sprite):
                         break
                     if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -75,7 +74,6 @@ class Character(pygame.sprite.Sprite):
                         break
                     if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -87,7 +85,6 @@ class Character(pygame.sprite.Sprite):
                         break
                     if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -99,7 +96,6 @@ class Character(pygame.sprite.Sprite):
                         break
                     if not self.rect.collidelist(COLLISIONS):
                         is_dead = True
-                        print(COLLISIONS)
                     for i in range(len(coins_pos)):
                         if self.rect.colliderect(coins_pos[i]):
                             is_collected[i] = True
@@ -203,74 +199,72 @@ class Thorn(pygame.sprite.Sprite):
         COLLISIONS.append(self.rect)
 
 
-# class Spirit(pygame.sprite.Sprite):
-#     def __init__(self, pos_x, pos_y):
-#         global COLLISIONS
-#         super().__init__(player_group)
-#         self.image = load_image("spirit.png")
-#         self.rect = self.image.get_rect().move(
-#             50 * pos_x, 50 * pos_y)
-#         self.num = len(COLLISIONS)
-#         COLLISIONS.append(self.rect)
-#
-#     def update(self, k):
-#         global COLLISIONS
-#         global cir
-#         if cir == 50:
-#             queue = []
-#             pos = [0, 0]
-#             matrix = []
-#             for i in range(len(mmap) - 1):
-#                 matrix.append([])
-#                 for j in range(len(mmap[i])):
-#                     if k.get_at((50 * j, 50 * i)) == (255, 255, 0, 255):
-#                         matrix[i].append(-1)
-#                     else:
-#                         matrix[i].append(0)
-#             # self.rect.x = self.rect.x // len(matrix[self.rect.y // 50]) * len(matrix[self.rect.y // 50])
-#             matrix[self.rect.y // 50][self.rect.x // 50] = 1
-#             queue.append((self.rect.y // 50, self.rect.x // 50))
-#             now = (0, 0)
-#             while queue:
-#                 now = queue.pop(0)
-#                 if now[0] == POSITION[0] and now[1] == POSITION[1]:
-#                     break
-#                 if matrix[now[0]][now[1]] != -1 and now[0] != 0 and matrix[now[0] - 1][now[1]] == 0:
-#                     matrix[now[0] - 1][now[1]] = matrix[now[0]][now[1]] + 1
-#                     queue.append((now[0] - 1, now[1]))
-#                 if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 0:
-#                     matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
-#                     queue.append((now[0] + 1, now[1]))
-#                 if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[0] != len(mmap) - 2 \
-#                         and now[1] != 14 and matrix[now[0]][now[1] + 1] == 0:
-#                     matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
-#                     queue.append((now[0], now[1] + 1))
-#                 if matrix[now[0]][now[1]] != -1 and now[1] != 0 and matrix[now[0]][now[1] - 1] == 0:
-#                     matrix[now[0]][now[1] - 1] = matrix[now[0]][now[1]] + 1
-#                     queue.append((now[0], now[1] - 1))
-#             queue.clear()
-#             # for i in matrix:
-#             #     print(i)
-#             while matrix[now[0]][now[1]] > 2:
-#                 if now[0] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0] - 1][now[1]]:
-#                     now = (now[0] - 1, now[1])
-#                 elif now[0] != len(mmap) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
-#                     now = (now[0] + 1, now[1])
-#                 elif now[1] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] - 1]:
-#                     now = (now[0], now[1] - 1)
-#                 elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
-#                     now = (now[0], now[1] + 1)
-#             if now[0] != 0 and matrix[now[0] - 1][now[1]] == 1:
-#                 self.rect.y += 50
-#             elif now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 1:
-#                 self.rect.y -= 50
-#             elif now[1] != 0 and matrix[now[0]][now[1] - 1] == 1:
-#                 self.rect.x += 50
-#             elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1] + 1] == 1:
-#                 self.rect.x -= 50
-#             cir = 0
-#             COLLISIONS[self.num] = self.rect
-#         cir += 1
+class Spirit(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        global COLLISIONS
+        super().__init__(player_group)
+        self.image = load_image("spirit.png")
+        self.rect = self.image.get_rect().move(
+            50 * pos_x, 50 * pos_y)
+        self.num = len(COLLISIONS)
+        COLLISIONS.append(self.rect)
+
+    def update(self, k):
+        global COLLISIONS
+        global cir
+        if cir == 5:
+            queue = []
+            pos = [0, 0]
+            matrix = []
+            for i in range(len(mmap) - 1):
+                matrix.append([])
+                for j in range(len(mmap[i])):
+                    if k.get_at((50 * j, 50 * i)) == (255, 255, 0, 255):
+                        matrix[i].append(-1)
+                    else:
+                        matrix[i].append(0)
+            # self.rect.x = self.rect.x // len(matrix[self.rect.y // 50]) * len(matrix[self.rect.y // 50])
+            matrix[self.rect.y // 50][self.rect.x // 50] = 1
+            queue.append((self.rect.y // 50, self.rect.x // 50))
+            now = (0, 0)
+            while queue:
+                now = queue.pop(0)
+                if now[0] == POSITION[0] and now[1] == POSITION[1]:
+                    break
+                if matrix[now[0]][now[1]] != -1 and now[0] != 0 and matrix[now[0] - 1][now[1]] == 0:
+                    matrix[now[0] - 1][now[1]] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0] - 1, now[1]))
+                if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 2 and matrix[now[0] + 1][now[1]] == 0:
+                    matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0] + 1, now[1]))
+                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 2 and now[0] != len(mmap) - 1 \
+                        and now[1] != 30 and matrix[now[0]][now[1] + 1] == 0:
+                    matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0], now[1] + 1))
+                if matrix[now[0]][now[1]] != -1 and now[1] != 0 and matrix[now[0]][now[1] - 1] == 0:
+                    matrix[now[0]][now[1] - 1] = matrix[now[0]][now[1]] + 1
+                    queue.append((now[0], now[1] - 1))
+            queue.clear()
+            while matrix[now[0]][now[1]] > 2:
+                if now[0] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0] - 1][now[1]]:
+                    now = (now[0] - 1, now[1])
+                elif now[0] != len(mmap) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
+                    now = (now[0] + 1, now[1])
+                elif now[1] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] - 1]:
+                    now = (now[0], now[1] - 1)
+                elif now[1] != len(mmap[now[0]]) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
+                    now = (now[0], now[1] + 1)
+            if now[0] != 0 and matrix[now[0] - 1][now[1]] == 1:
+                self.rect.y += 50
+            elif now[0] != len(mmap) - 2 and matrix[now[0] + 1][now[1]] == 1:
+                self.rect.y -= 50
+            elif now[1] != 0 and matrix[now[0]][now[1] - 1] == 1:
+                self.rect.x += 50
+            elif now[1] != len(mmap[now[0]]) - 2 and matrix[now[0]][now[1] + 1] == 1:
+                self.rect.x -= 50
+            cir = 0
+            COLLISIONS[self.num] = self.rect
+        cir += 1
 
 
 # class Dart_Trap(pygame.sprite.Sprite):
@@ -344,8 +338,8 @@ def generate_level(level):
                 Win(x, y)
             elif level[y][x] == '@':
                 xp, yp = x, y
-            # elif level[y][x] == '&':
-            #     Spirit(x, y)
+            elif level[y][x] == '&':
+                Spirit(x, y)
             elif level[y][x] == '$':
                 AnimatedSprite(x * 50, y * 50)
 
@@ -389,7 +383,7 @@ def database():
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 600
+    size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
     a = start_menu(screen)
     pygame.display.flip()
