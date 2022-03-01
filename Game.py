@@ -1,16 +1,24 @@
 import random
-
+import sys
+import sqlite3
 import pygame
 import os
 import sys
 from time import sleep
-from Main import start_menu, pause, win
+from Main import start_menu, pause, win, level_select, lose
+
+winn = False
 
 poss = (0, 0)
 cir = 0
 coins_pos = []
 COLLISIONS = []
+is_collected = []
+count = 0
+is_dead = False
 
+
+# 2
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -36,18 +44,16 @@ def draw(screen):
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, *group):
-        global POSITION, COLLISIONS
+        global POSITION
         super().__init__(*group)
         self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
-        COLLISIONS.append(self.rect)
-        self.num = len(COLLISIONS) - 1
         self.rect.x, self.rect.y = POSITION[0] * self.image.get_width(), \
                                    self.image.get_height() * POSITION[1]
         POSITION = [self.rect.y // 50, self.rect.x // 50]
 
     def update(self, k, *args):
-        global POSITION, win_coord
+        global POSITION, win_coord, winn, coins_pos, is_dead
         if args and args[0].type == pygame.KEYDOWN:
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_s:
                 while self.rect.y + 1 < 851:
@@ -55,35 +61,62 @@ class Character(pygame.sprite.Sprite):
                         self.rect.y += 1
                     else:
                         break
+                    for i in COLLISIONS:
+                        if self.rect.colliderect(i):
+                            is_dead = True
+                            break
+                    for i in range(len(coins_pos)):
+                        if self.rect.colliderect(coins_pos[i]):
+                            is_collected[i] = True
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_w:
                 while self.rect.y - 1 >= 0:
                     if k.get_at((self.rect.x, self.rect.y - 1)) != (255, 255, 0, 255):
                         self.rect.y -= 1
                     else:
                         break
+                    for i in COLLISIONS:
+                        if self.rect.colliderect(i):
+                            is_dead = True
+                            break
+                    for i in range(len(coins_pos)):
+                        if self.rect.colliderect(coins_pos[i]):
+                            is_collected[i] = True
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_a:
                 while self.rect.x - 1 >= 0:
                     if k.get_at((self.rect.x - 1, self.rect.y)) != (255, 255, 0, 255):
                         self.rect.x -= 1
                     else:
                         break
+                    for i in COLLISIONS:
+                        if self.rect.colliderect(i):
+                            is_dead = True
+                            break
+                    for i in range(len(coins_pos)):
+                        if self.rect.colliderect(coins_pos[i]):
+                            is_collected[i] = True
             if args and args[0].type == pygame.KEYDOWN and args[0].key == pygame.K_d:
                 while self.rect.x + 1 < 1351:
                     if k.get_at(((self.rect.x + self.image.get_width()) % width, self.rect.y)) != (255, 255, 0, 255):
                         self.rect.x += 1
                     else:
                         break
+                    for i in COLLISIONS:
+                        if self.rect.colliderect(i):
+                            is_dead = True
+                            break
+                    for i in range(len(coins_pos)):
+                        if self.rect.colliderect(coins_pos[i]):
+                            is_collected[i] = True
             if win_coord[0] == self.rect.x and win_coord[1] == self.rect.y:
-                win(screen)
-
+                pygame.display.flip()
+                winn = True
         POSITION = (self.rect.y // 50, self.rect.x // 50)
-        COLLISIONS[self.num] = self.rect
+        print(COLLISIONS)
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(animated_group)
-        coins_pos.append((x, y))
         self.frames = []
         sheet = load_image("coins.png")
         sheet = pygame.transform.scale(sheet, (400, 50))
@@ -91,6 +124,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
+        self.num = len(coins_pos)
+        coins_pos.append(self.rect)
+        is_collected.append(False)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -102,11 +138,17 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames * 2)
-        self.image = self.frames[self.cur_frame // 2]
-
-    def kick(self):
-        all_sprites.remove()
+        global count, coin
+        if is_collected[self.num]:
+            self.rect.y = 0
+            self.rect.x = 50 * count
+            count += 1
+            is_collected[self.num] = False
+            print(count)
+        else:
+            self.rect = coins_pos[self.num]
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames * 2)
+            self.image = self.frames[self.cur_frame // 2]
 
 
 def load_level(filename):
@@ -121,12 +163,10 @@ def load_level(filename):
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
-        global COLLISIONS
         super().__init__(tiles_group, all_sprites)
         self.image = load_image("wall.png")
         self.rect = self.image.get_rect().move(
             self.image.get_width() * pos_x, self.image.get_height() * pos_y)
-        COLLISIONS.append(self.rect)
 
 
 class Win(pygame.sprite.Sprite):
@@ -144,6 +184,7 @@ class Win(pygame.sprite.Sprite):
 
 class Thorn(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, rotation):
+        global COLLISIONS
         super().__init__(tiles_group, all_sprites)
         if rotation == "up":
             self.image = load_image("thorns_up.png")
@@ -164,18 +205,23 @@ class Thorn(pygame.sprite.Sprite):
             self.image = load_image("thorns_right.png")
             self.rect = self.image.get_rect().move(
                 self.image.get_width() * pos_x, self.image.get_height() * pos_y)
+        COLLISIONS.append(self.rect)
 
 
 class Spirit(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
+        global COLLISIONS
         super().__init__(player_group)
         self.image = load_image("spirit.png")
         self.rect = self.image.get_rect().move(
             50 * pos_x, 50 * pos_y)
+        self.num = len(COLLISIONS)
+        COLLISIONS.append(self.rect)
 
     def update(self, k):
+        global COLLISIONS
         global cir
-        if cir == 50:
+        if cir == 5:
             queue = []
             pos = [0, 0]
             matrix = []
@@ -197,37 +243,36 @@ class Spirit(pygame.sprite.Sprite):
                 if matrix[now[0]][now[1]] != -1 and now[0] != 0 and matrix[now[0] - 1][now[1]] == 0:
                     matrix[now[0] - 1][now[1]] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0] - 1, now[1]))
-                if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 0:
+                if matrix[now[0]][now[1]] != -1 and now[0] != len(mmap) - 2 and matrix[now[0] + 1][now[1]] == 0:
                     matrix[now[0] + 1][now[1]] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0] + 1, now[1]))
-                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 1 and now[0] != len(mmap) - 2\
-                        and now[1] != 14 and matrix[now[0]][now[1] + 1] == 0:
+                if matrix[now[0]][now[1]] != -1 and now[1] != len(mmap[now[0]]) - 2 and now[0] != len(mmap) - 1 \
+                        and now[1] != 30 and matrix[now[0]][now[1] + 1] == 0:
                     matrix[now[0]][now[1] + 1] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0], now[1] + 1))
                 if matrix[now[0]][now[1]] != -1 and now[1] != 0 and matrix[now[0]][now[1] - 1] == 0:
                     matrix[now[0]][now[1] - 1] = matrix[now[0]][now[1]] + 1
                     queue.append((now[0], now[1] - 1))
             queue.clear()
-            # for i in matrix:
-            #     print(i)
             while matrix[now[0]][now[1]] > 2:
                 if now[0] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0] - 1][now[1]]:
                     now = (now[0] - 1, now[1])
-                elif now[0] != len(mmap) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
+                elif now[0] != len(mmap) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
                     now = (now[0] + 1, now[1])
                 elif now[1] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] - 1]:
                     now = (now[0], now[1] - 1)
-                elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
+                elif now[1] != len(mmap[now[0]]) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
                     now = (now[0], now[1] + 1)
             if now[0] != 0 and matrix[now[0] - 1][now[1]] == 1:
                 self.rect.y += 50
-            elif now[0] != len(mmap) - 1 and matrix[now[0] + 1][now[1]] == 1:
+            elif now[0] != len(mmap) - 2 and matrix[now[0] + 1][now[1]] == 1:
                 self.rect.y -= 50
             elif now[1] != 0 and matrix[now[0]][now[1] - 1] == 1:
                 self.rect.x += 50
-            elif now[1] != len(mmap[now[0]]) - 1 and matrix[now[0]][now[1] + 1] == 1:
+            elif now[1] != len(mmap[now[0]]) - 2 and matrix[now[0]][now[1] + 1] == 1:
                 self.rect.x -= 50
             cir = 0
+            COLLISIONS[self.num] = self.rect
         cir += 1
 
 
@@ -306,20 +351,42 @@ def generate_level(level):
                 Spirit(x, y)
             elif level[y][x] == '$':
                 AnimatedSprite(x * 50, y * 50)
-            # elif level[y][x] == 'd':
-            #     Dart_Trap(x, y, "d")
-            #     Arrow(x, y, "d")
-            # elif level[y][x] == 'u':
-            #     Dart_Trap(x, y, "u")
-            #     Arrow(x, y, "u")
-            # elif level[y][x] == 'l':
-            #     Dart_Trap(x, y, "l")
-            #     Arrow(x, y, "l")
-            # elif level[y][x] == 'r':
-            #     Dart_Trap(x, y, "r")
-            #     Arrow(x, y, "r")
 
     return xp, yp
+
+
+def choose_level(level):
+    global mmap, POSITION
+    if level == "1":
+        mmap = load_level('map.txt')
+        POSITION = generate_level(mmap)
+    elif level == "2":
+        mmap = load_level('map2.txt')
+        POSITION = generate_level(mmap)
+    elif level == "3":
+        mmap = load_level('map3.txt')
+        POSITION = generate_level(mmap)
+
+
+def delete_sprite():
+    global all_sprites, tiles_group, player_group, animated_group, count
+    count = 0
+    for i in all_sprites:
+        i.kill()
+    for j in animated_group:
+        j.kill()
+    for i in player_group:
+        i.kill()
+
+
+def load_pers():
+    global player_group
+    player_group = pygame.sprite.Group()
+    Character(all_sprites)
+
+
+def get_coins():
+    pass
 
 
 if __name__ == '__main__':
@@ -331,14 +398,13 @@ if __name__ == '__main__':
     pygame.mixer.music.set_volume(volume)
     size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
-    start_menu(screen)
+    a = start_menu(screen)
     pygame.display.flip()
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     animated_group = pygame.sprite.Group()
-    mmap = load_level('map2.txt')
-    POSITION = generate_level(mmap)
+    choose_level(a)
     Character(all_sprites)
     clock = pygame.time.Clock()
     pygame.mouse.set_visible(False)
@@ -347,10 +413,21 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                pause(screen)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                e = pause(screen)
+                if e:
+                    delete_sprite()
+                    if e == "1":
+                        b = level_select(screen)
+                        choose_level(b)
+                        load_pers()
+                    elif e == "0":
+                        a = start_menu(screen)
+                        choose_level(a)
+                        load_pers()
+
                 pygame.display.flip()
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
                 if event.key == pygame.K_SPACE:
                     music_pause = not music_pause
@@ -371,5 +448,18 @@ if __name__ == '__main__':
         player_group.draw(screen)
         animated_group.draw(screen)
         pygame.display.flip()
+        if winn:
+            get_coins()
+            b = win(screen, count)
+            delete_sprite()
+            choose_level(b)
+            load_pers()
+            winn = False
+            pygame.display.flip()
+        if is_dead:
+            get_coins()
+            lose(screen)
+            pygame.display.flip()
+            is_dead = False
         clock.tick(20)
     pygame.quit()
