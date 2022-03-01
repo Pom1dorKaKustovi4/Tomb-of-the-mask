@@ -1,7 +1,6 @@
 import pygame
 
 
-# 1
 def start_menu(screen):
     size = width, height = 1440, 900
     screen.fill((0, 0, 0))
@@ -141,7 +140,6 @@ def level_select(screen):
 
 
 def pause(screen):
-    print("work")
     size = width, height = 1440, 900
     screen.fill((120, 120, 120), pygame.Rect(520, 0, 400, 900))
     pygame.draw.line(screen, (100, 100, 100), (530, 0), (530, 900), width=20)
@@ -218,11 +216,8 @@ def pause(screen):
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and exit:
                 return "0"
- #               running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and l_sel:
                 return "1"
-   #             running = False
-
 
 
 def win(screen, monet):
