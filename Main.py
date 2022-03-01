@@ -338,9 +338,11 @@ def lose(screen):
                     try_again = False
             if event.type == pygame.MOUSEBUTTONDOWN and b_select_level:
                 running = False
-                level_select(screen)
+                result = level_select(screen)
+                return result
             if event.type == pygame.MOUSEBUTTONDOWN and try_again:
                 running = False
+                return "try_again"
 
 
 if __name__ == '__main__':

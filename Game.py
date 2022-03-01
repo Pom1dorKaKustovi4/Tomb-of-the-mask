@@ -16,6 +16,8 @@ COLLISIONS = []
 is_collected = []
 count = 0
 is_dead = False
+character_pos_x = 0
+character_pos_y = 0
 
 
 # 2
@@ -330,6 +332,7 @@ class Spirit(pygame.sprite.Sprite):
 
 
 def generate_level(level):
+    global character_pos_x, character_pos_y
     x, y = None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -347,6 +350,7 @@ def generate_level(level):
                 Win(x, y)
             elif level[y][x] == '@':
                 xp, yp = x, y
+                character_pos_x, character_pos_y = x * 50, y * 50
             elif level[y][x] == '&':
                 Spirit(x, y)
             elif level[y][x] == '$':
@@ -385,10 +389,6 @@ def load_pers():
     Character(all_sprites)
 
 
-def get_coins():
-    pass
-
-
 if __name__ == '__main__':
     pygame.init()
     pygame.mixer.music.load("data/music.mpeg")
@@ -399,6 +399,7 @@ if __name__ == '__main__':
     size = width, height = 1440, 900
     screen = pygame.display.set_mode(size)
     a = start_menu(screen)
+    current_lvl = a
     pygame.display.flip()
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
@@ -420,12 +421,13 @@ if __name__ == '__main__':
                     if e == "1":
                         b = level_select(screen)
                         choose_level(b)
+                        current_lvl = a
                         load_pers()
                     elif e == "0":
                         a = start_menu(screen)
+                        current_lvl = a
                         choose_level(a)
                         load_pers()
-
                 pygame.display.flip()
             if event.type == pygame.KEYDOWN:
                 all_sprites.update(screen, event)
@@ -449,16 +451,23 @@ if __name__ == '__main__':
         animated_group.draw(screen)
         pygame.display.flip()
         if winn:
-            get_coins()
             b = win(screen, count)
             delete_sprite()
             choose_level(b)
+            current_lvl = b
             load_pers()
             winn = False
             pygame.display.flip()
         if is_dead:
-            get_coins()
-            lose(screen)
+            b = lose(screen)
+            delete_sprite()
+            if b != "try_again":
+                choose_level(b)
+                current_lvl = b
+                load_pers()
+            else:
+                choose_level(current_lvl)
+                load_pers()
             pygame.display.flip()
             is_dead = False
         clock.tick(20)
