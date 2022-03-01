@@ -1,26 +1,8 @@
-import random
-import sys
-import sqlite3
 import pygame
 import os
 import sys
-from time import sleep
 from Main import start_menu, pause, win, level_select, lose
 
-winn = False
-
-poss = (0, 0)
-cir = 0
-coins_pos = []
-COLLISIONS = []
-is_collected = []
-count = 0
-is_dead = False
-character_pos_x = 0
-character_pos_y = 0
-
-
-# 2
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -50,8 +32,7 @@ class Character(pygame.sprite.Sprite):
         super().__init__(*group)
         self.image = load_image("coala.png")
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = POSITION[0] * self.image.get_width(), \
-                                   self.image.get_height() * POSITION[1]
+        self.rect.x, self.rect.y = POSITION[0] * self.image.get_width(), self.image.get_height() * POSITION[1]
         POSITION = [self.rect.y // 50, self.rect.x // 50]
 
     def update(self, k, *args):
@@ -223,7 +204,7 @@ class Spirit(pygame.sprite.Sprite):
     def update(self, k):
         global COLLISIONS
         global cir
-        if cir == 5:
+        if cir == 3:
             queue = []
             pos = [0, 0]
             matrix = []
@@ -234,7 +215,6 @@ class Spirit(pygame.sprite.Sprite):
                         matrix[i].append(-1)
                     else:
                         matrix[i].append(0)
-            # self.rect.x = self.rect.x // len(matrix[self.rect.y // 50]) * len(matrix[self.rect.y // 50])
             matrix[self.rect.y // 50][self.rect.x // 50] = 1
             queue.append((self.rect.y // 50, self.rect.x // 50))
             now = (0, 0)
@@ -257,13 +237,15 @@ class Spirit(pygame.sprite.Sprite):
                     queue.append((now[0], now[1] - 1))
             queue.clear()
             while matrix[now[0]][now[1]] > 2:
-                if now[0] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0] - 1][now[1]]:
+                if now[0] != 0 and int(matrix[int(now[0])][int(now[1])]) - 1 == matrix[now[0] - 1][now[1]]:
                     now = (now[0] - 1, now[1])
-                elif now[0] != len(mmap) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0] + 1][now[1]]:
+                elif now[0] != len(mmap) - 2 and int(matrix[int(now[0])][int(now[1])]) \
+                        - 1 == matrix[now[0] + 1][now[1]]:
                     now = (now[0] + 1, now[1])
-                elif now[1] != 0 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] - 1]:
+                elif now[1] != 0 and int(matrix[int(now[0])][int(now[1])]) - 1 == matrix[now[0]][now[1] - 1]:
                     now = (now[0], now[1] - 1)
-                elif now[1] != len(mmap[now[0]]) - 2 and matrix[now[0]][now[1]] - 1 == matrix[now[0]][now[1] + 1]:
+                elif now[1] != len(mmap[now[0]]) - 2 and int(matrix[int(now[0])][int(now[1])]) \
+                        - 1 == matrix[now[0]][now[1] + 1]:
                     now = (now[0], now[1] + 1)
             if now[0] != 0 and matrix[now[0] - 1][now[1]] == 1:
                 self.rect.y += 50
@@ -278,62 +260,10 @@ class Spirit(pygame.sprite.Sprite):
         cir += 1
 
 
-# class Dart_Trap(pygame.sprite.Sprite):
-#     def __init__(self, pos_x, pos_y, direction):
-#         global COLLISIONS
-#         super().__init__(player_group)
-#         if direction == "r":
-#             self.image = load_image("Dart_Trap.png")
-#         elif direction == "l":
-#             self.image = pygame.transform.flip(load_image("Dart_Trap.png"), True, False)
-#         elif direction == "d":
-#             self.image = pygame.transform.rotate(load_image("Dart_Trap.png"), 270)
-#         elif direction == "u":
-#             self.image = pygame.transform.rotate(load_image("Dart_Trap.png"), 90)
-#         self.rect = self.image.get_rect().move(
-#             50 * pos_x, 50 * pos_y)
-#         # COLLISIONS.append(self.rect)
-
-
-# class Arrow(pygame.sprite.Sprite):
-#     def __init__(self, pos_x, pos_y, direction):
-#         super().__init__(player_group)
-#         self.pos_x = pos_x
-#         self.pos_y = pos_y
-#         if direction == "r":
-#             self.image = load_image("Arrow.png")
-#             self.rect = self.image.get_rect().move((self.pos_x + 1) * 50, self.pos_y * 50 + 35)
-#         elif direction == "l":
-#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 180)
-#             self.rect = self.image.get_rect().move(self.pos_x * 50 - self.image.get_width(), self.pos_y * 50 + 35)
-#         elif direction == "d":
-#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 270)
-#             self.rect = self.image.get_rect().move(self.pos_x * 50 + 5, (self.pos_y + 1) * 50)
-#         elif direction == "u":
-#             self.image = pygame.transform.rotate(load_image("Arrow.png"), 90)
-#             self.rect = self.image.get_rect().move(self.pos_x * 50 + 35, self.pos_y * 50 - self.image.get_height())
-#         self.direction = direction
-#         self.pos = (self.rect.x, self.rect.y)
-#
-#     def update(self, k):
-#         if self.rect.collidelist(COLLISIONS):
-#             if self.direction == "l":
-#                 self.rect.x -= 1
-#             elif self.direction == "r":
-#                 self.rect.x += 1
-#             elif self.direction == "d":
-#                 self.rect.y += 1
-#             elif self.direction == "u":
-#                 self.rect.y -= 1
-#         else:
-#             self.rect.x = self.pos[0]
-#             self.rect.y = self.pos[1]
-#             print(COLLISIONS)
-
-
 def generate_level(level):
     global character_pos_x, character_pos_y
     x, y = None, None
+    xp, yp = 0, 0
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '#':
@@ -368,6 +298,9 @@ def choose_level(level):
         mmap = load_level('map2.txt')
         POSITION = generate_level(mmap)
     elif level == "3":
+        mmap = load_level('map4.txt')
+        POSITION = generate_level(mmap)
+    elif level == "4":
         mmap = load_level('map3.txt')
         POSITION = generate_level(mmap)
 
@@ -391,6 +324,17 @@ def load_pers():
 
 if __name__ == '__main__':
     pygame.init()
+    winn = False
+    poss = (0, 0)
+    cir = 0
+    coins_pos = []
+    COLLISIONS = []
+    is_collected = []
+    count = 0
+    is_dead = False
+    character_pos_x = 0
+    character_pos_y = 0
+    POSITION = list()
     pygame.mixer.music.load("data/music.mpeg")
     pygame.mixer.music.play(-1)
     volume = 0.5
@@ -419,11 +363,13 @@ if __name__ == '__main__':
                 if e:
                     delete_sprite()
                     if e == "1":
+                        COLLISIONS = []
                         b = level_select(screen)
                         choose_level(b)
                         current_lvl = a
                         load_pers()
                     elif e == "0":
+                        COLLISIONS = []
                         a = start_menu(screen)
                         current_lvl = a
                         choose_level(a)
@@ -458,6 +404,7 @@ if __name__ == '__main__':
             load_pers()
             winn = False
             pygame.display.flip()
+            COLLISIONS = []
         if is_dead:
             b = lose(screen)
             delete_sprite()
@@ -465,6 +412,7 @@ if __name__ == '__main__':
                 choose_level(b)
                 current_lvl = b
                 load_pers()
+                COLLISIONS = []
             else:
                 choose_level(current_lvl)
                 load_pers()

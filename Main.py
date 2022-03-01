@@ -1,7 +1,6 @@
 import pygame
 
 
-# 1
 def start_menu(screen):
     size = width, height = 1440, 900
     screen.fill((0, 0, 0))
